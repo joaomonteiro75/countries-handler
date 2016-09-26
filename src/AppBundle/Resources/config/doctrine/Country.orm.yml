@@ -1,0 +1,42 @@
+AppBundle\Entity\Country:
+    type: entity
+    table: countries
+    oneToMany:
+        borders:
+          targetEntity: Borders
+          mappedBy: country
+    oneToMany:
+        translations:
+          targetEntity: Translations
+          mappedBy: country
+    repositoryClass: AppBundle\Repository\CountryRepository
+    id:
+        id:
+            type: integer
+            id: true
+            generator:
+                strategy: AUTO
+    fields:
+        name:
+            type: string
+            length: 255
+        tld:
+            type: string
+            length: 255
+        iso2:
+            type: string
+            length: 2
+        iso3:
+            type: string
+            length: 3
+            unique: true
+        lat:
+            type: string
+            length: 255
+        lng:
+            type: string
+            length: 255
+        languages:
+            type: string
+            length: 255
+    lifecycleCallbacks: {  }

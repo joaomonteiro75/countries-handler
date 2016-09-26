@@ -2,11 +2,15 @@
 
 namespace AppBundle\Command;
 
+use AppBundle\Entity\Borders;
+use AppBundle\Entity\Translations;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+
+use AppBundle\Entity\Country;
 
 class DatabasePopulateCommand extends ContainerAwareCommand
 {
@@ -23,16 +27,12 @@ class DatabasePopulateCommand extends ContainerAwareCommand
     {
         $argument = $input->getArgument('db');
 
-	$data_fetched = $this->fetchData($output);
-	if ($data_fetched)
-	{
-		$data_parsed = $this->parseData($output, $data_fetched);
-	}
-	if ($data_parsed)
-	{
-		$this->populateDB($output, $data_parsed);
-	}
-        $output->writeln('Command result.');
+        $data_fetched = $this->fetchData($output);
+        if ($data_fetched)
+        {
+            $populate_result = $this->parseDataAndPopulate($output, $data_fetched);
+        }
+        $output->writeln('Command result:' . $populate_result);
     }
 
 	public function fetchData($output)
@@ -61,40 +61,76 @@ class DatabasePopulateCommand extends ContainerAwareCommand
 
 	}
 
-	public function parseData($output, $data_fetched)
+	public function parseDataAndPopulate($output, $data_fetched)
 	{
 		$return_array = false;
+        $em = $this->getContainer()->get('doctrine')->getManager();
+
 		foreach ($data_fetched as $country)
-                {
-                        $name = $country->name;
-
-$output->writeln(">>>>>>>>>>>>>" . $name . "\n");
-
+        {
+            //these are sometimes empty
 			$lat = 0;
 			$lng = 0;
-                        $tld = $country->topLevelDomain[0];
-                        $iso2 = $country->alpha2Code;
-                        $iso3 = $country->alpha3Code;
-                        $geo = $country->latlng;
-			if (count($geo) == 2)
+            $tld = '';
+
+            $newCountry = $em->getRepository('AppBundle:Country')->findOneBy(array('iso3' => $country->alpha3Code));
+            if(!$newCountry)
+            {
+                $newCountry     = new Country();
+            }
+
+            $newCountry->setName($country->name);
+
+            if (isset($country->topLevelDomain[0]))
+            {
+                $tld        = $country->topLevelDomain[0];
+            }
+            $newCountry->setTld($tld);
+
+            $newCountry->setIso2($country->alpha2Code);
+            $newCountry->setIso3($country->alpha3Code);
+
+            $geo            = $country->latlng;
+			if (count($geo) == 2) //have both lat and lng
 			{
-                        	$lat = $geo[0];
-                        	$lng = $geo[1];
+			    $lat        = $geo[0];
+                $lng        = $geo[1];
 			}
-                        $translations = $country->translations;
-                        $borders = $country->borders;
-                        $languages = $country->languages;
+            $newCountry->setLat($lat);
+            $newCountry->setLng($lng);
+            $newCountry->setLanguages(serialize($country->languages));
 
-                        $echothing = $name . "#" . $tld . "#" . $iso2 . "#" . $iso3 . "#" . $lat . "#" . $lng . "\n";
-                        $return_array[] = $echothing; 
-                        $output->writeln($echothing);
+            foreach ($country->borders as $border)
+            {
+                $newBorder = new Borders();
+                $newBorder->setBorder($border);
+                $newBorder->setCountry($newCountry);
+                $em->persist($newBorder);
+                $newCountry->addBorder($newBorder);
+            }
+
+            foreach ($country->translations as $translation_key => $translation_value)
+            {
+                if ($translation_key && $translation_value)
+                {
+                    $newTranslation = new Translations();
+                    $newTranslation->setOriginal($newCountry->getName());
+                    $newTranslation->setTranslateto($translation_key);
+                    $newTranslation->setTranslation($translation_value);
+                    $newTranslation->setCountry($newCountry);
+                    $em->persist($newTranslation);
+                    $newCountry->addTranslation($newTranslation);
                 }
-		return $return_array;
-	}
 
-	public function populateDB($output, $data_parsed)
-	{
-		$output->writeln('saving objects');
+            }
+
+            $em->persist($newCountry);
+            $em->flush();
+
+            $echothing = $newCountry->getName() . "#" . $newCountry->getTld() . "#" . $newCountry->getIso2() . "#" . $newCountry->getIso3() . "#" . $newCountry->getLat() . "#" . $newCountry->getLng() . "\n";
+            $output->writeln($echothing);
+        }
+		return $return_array;
 	}
 
 }

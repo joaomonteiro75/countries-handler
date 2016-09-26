@@ -1,0 +1,28 @@
+AppBundle\Entity\Translations:
+    type: entity
+    manyToOne:
+        country:
+          targetEntity: Country
+          inversedBy: translations
+          joinColumn:
+            name: country_id
+            referencedColumnName: id
+    table: translations
+    repositoryClass: AppBundle\Repository\TranslationsRepository
+    id:
+        id:
+            type: integer
+            id: true
+            generator:
+                strategy: AUTO
+    fields:
+        original:
+            type: string
+            length: 255
+        translateto:
+            type: string
+            length: 255
+        translation:
+            type: string
+            length: 255
+    lifecycleCallbacks: {  }
