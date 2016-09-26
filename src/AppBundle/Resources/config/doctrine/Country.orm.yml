@@ -9,6 +9,10 @@ AppBundle\Entity\Country:
         translations:
           targetEntity: Translations
           mappedBy: country
+    oneToMany:
+            languages:
+              targetEntity: Languages
+              mappedBy: country
     repositoryClass: AppBundle\Repository\CountryRepository
     id:
         id:

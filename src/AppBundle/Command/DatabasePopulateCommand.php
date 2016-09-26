@@ -76,7 +76,7 @@ class DatabasePopulateCommand extends ContainerAwareCommand
             $newCountry = $em->getRepository('AppBundle:Country')->findOneBy(array('iso3' => $country->alpha3Code));
             if(!$newCountry)
             {
-                $newCountry     = new Country();
+                $newCountry = new Country();
             }
 
             $newCountry->setName($country->name);
@@ -121,7 +121,6 @@ class DatabasePopulateCommand extends ContainerAwareCommand
                     $em->persist($newTranslation);
                     $newCountry->addTranslation($newTranslation);
                 }
-
             }
 
             $em->persist($newCountry);
