@@ -2,3 +2,4 @@
 /app/logs
 /var/cache
 /.idea/
+/vendor/
