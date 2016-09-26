@@ -43,10 +43,9 @@ class DefaultController extends Controller
         $countries = $this->getDoctrine()->getRepository('AppBundle:Country')->findAll();
         foreach ($countries as $country)
         {
-dump($country);die;
             foreach ( $country->getLanguages() as $language )
             {
-                if ($language == $lan)
+                if ($language->getLanguage() == $lang)
                 {
                     $result[] = $country;
                     break;
