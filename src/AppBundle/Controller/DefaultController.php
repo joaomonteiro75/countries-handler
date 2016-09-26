@@ -23,10 +23,6 @@ class DefaultController extends Controller
     public function countriesAction()
     {
         $countries = $this->getDoctrine()->getRepository('AppBundle:Country')->findAll();
-
-       if(!is_object($countries)){
-//            throw $this->createNotFoundException();
-        }
         return $countries;
     }
 
@@ -45,12 +41,9 @@ class DefaultController extends Controller
     {
         $result = [];
         $countries = $this->getDoctrine()->getRepository('AppBundle:Country')->findAll();
-        if(!is_object($countries)){
-            throw $this->createNotFoundException();
-        }
-
         foreach ($countries as $country)
         {
+dump($country);die;
             foreach ( $country->getLanguages() as $language )
             {
                 if ($language == $lan)

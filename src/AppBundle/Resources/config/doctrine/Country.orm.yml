@@ -5,11 +5,9 @@ AppBundle\Entity\Country:
         borders:
           targetEntity: Borders
           mappedBy: country
-    oneToMany:
         translations:
           targetEntity: Translations
           mappedBy: country
-    oneToMany:
         languages:
           targetEntity: Languages
           mappedBy: country

@@ -8,3 +8,4 @@ var/cache
 .ideia
 /vendor/
 vendor
+/nbproject/private/
