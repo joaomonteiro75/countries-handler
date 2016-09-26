@@ -38,12 +38,26 @@ class DefaultController extends Controller
         return $country;
     }
 
+    //this is crap - change it
     public function countriesByLanguageAction($lang)
     {
-        $countries = $this->getDoctrine()->getRepository('AppBundle:Country')->findBy(array('iso2' => $iso2));
+        $result = [];
+        $countries = $this->getDoctrine()->getRepository('AppBundle:Country')->findAll();
         if(!is_object($countries)){
             throw $this->createNotFoundException();
         }
-        return $countries;
+
+        foreach ($countries as $country)
+        {
+            foreach ( $country->getLanguages() as $language )
+            {
+                if ($language == $lan)
+                {
+                    $result[] = $country;
+                    break;
+                }
+            }
+        }
+        return $result;
     }
 }
