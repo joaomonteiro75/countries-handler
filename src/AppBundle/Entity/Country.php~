@@ -209,6 +209,7 @@ class Country
     {
         $this->borders = new \Doctrine\Common\Collections\ArrayCollection();
         $this->translations = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->languages = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -290,17 +291,27 @@ class Country
     private $languages;
 
     /**
-     * Set languages
+     * Add language
      *
-     * @param array $languages
+     * @param \AppBundle\Entity\Languages $language
      *
      * @return Country
      */
-    public function setLanguages($languages)
+    public function addLanguage(\AppBundle\Entity\Languages $language)
     {
-        $this->languages = $languages;
+        $this->languages[] = $language;
 
         return $this;
+    }
+
+    /**
+     * Remove language
+     *
+     * @param \AppBundle\Entity\Languages $translation
+     */
+    public function removeLanguage(\AppBundle\Entity\Language $language)
+    {
+        $this->languages->removeElement($language);
     }
 
     /**

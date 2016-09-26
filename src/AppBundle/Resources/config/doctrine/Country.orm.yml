@@ -10,9 +10,9 @@ AppBundle\Entity\Country:
           targetEntity: Translations
           mappedBy: country
     oneToMany:
-            languages:
-              targetEntity: Languages
-              mappedBy: country
+        languages:
+          targetEntity: Languages
+          mappedBy: country
     repositoryClass: AppBundle\Repository\CountryRepository
     id:
         id:
@@ -38,9 +38,6 @@ AppBundle\Entity\Country:
             type: string
             length: 255
         lng:
-            type: string
-            length: 255
-        languages:
             type: string
             length: 255
     lifecycleCallbacks: {  }

@@ -4,7 +4,9 @@ namespace AppBundle\Command;
 
 use AppBundle\Entity\Borders;
 use AppBundle\Entity\Translations;
+use AppBundle\Entity\Languages;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -64,6 +66,7 @@ class DatabasePopulateCommand extends ContainerAwareCommand
 	public function parseDataAndPopulate($output, $data_fetched)
 	{
 		$return_array = false;
+        $counter = 0;
         $em = $this->getContainer()->get('doctrine')->getManager();
 
 		foreach ($data_fetched as $country)
@@ -79,17 +82,15 @@ class DatabasePopulateCommand extends ContainerAwareCommand
                 $newCountry = new Country();
             }
 
+            //most data
             $newCountry->setName($country->name);
-
             if (isset($country->topLevelDomain[0]))
             {
                 $tld        = $country->topLevelDomain[0];
             }
             $newCountry->setTld($tld);
-
             $newCountry->setIso2($country->alpha2Code);
             $newCountry->setIso3($country->alpha3Code);
-
             $geo            = $country->latlng;
 			if (count($geo) == 2) //have both lat and lng
 			{
@@ -98,8 +99,8 @@ class DatabasePopulateCommand extends ContainerAwareCommand
 			}
             $newCountry->setLat($lat);
             $newCountry->setLng($lng);
-            $newCountry->setLanguages(serialize($country->languages));
 
+            //borders
             foreach ($country->borders as $border)
             {
                 $newBorder = new Borders();
@@ -109,6 +110,7 @@ class DatabasePopulateCommand extends ContainerAwareCommand
                 $newCountry->addBorder($newBorder);
             }
 
+            //translations
             foreach ($country->translations as $translation_key => $translation_value)
             {
                 if ($translation_key && $translation_value)
@@ -123,13 +125,34 @@ class DatabasePopulateCommand extends ContainerAwareCommand
                 }
             }
 
-            $em->persist($newCountry);
-            $em->flush();
+            //languages
+            foreach ($country->languages as $language)
+            {
+                $newLanguage = new Languages();
+                $newLanguage->setLanguage($language);
+                $newLanguage->setCountry($newCountry);
+                $em->persist($newLanguage);
+                $newCountry->addLanguage($newLanguage);
+            }
 
-            $echothing = $newCountry->getName() . "#" . $newCountry->getTld() . "#" . $newCountry->getIso2() . "#" . $newCountry->getIso3() . "#" . $newCountry->getLat() . "#" . $newCountry->getLng() . "\n";
-            $output->writeln($echothing);
+            $em->persist($newCountry);
+
+            try
+            {
+                $counter++;
+                $em->flush();
+            }
+            catch (Exception $e)
+            {
+                $output->writeln('failed to populate country: ' . $country->name . ' :: ' . $e->getMessage());
+            }
+
+//            $echothing = $newCountry->getName() . "#" . $newCountry->getTld() . "#" . $newCountry->getIso2() . "#" . $newCountry->getIso3() . "#" . $newCountry->getLat() . "#" . $newCountry->getLng() . "\n";
+//            $output->writeln($echothing);
         }
-		return $return_array;
+
+        $output->writeln('populated ' . $counter . ' countries' );
+		return $counter;
 	}
 
 }
