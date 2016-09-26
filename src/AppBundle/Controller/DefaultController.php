@@ -23,8 +23,9 @@ class DefaultController extends Controller
     public function countriesAction()
     {
         $countries = $this->getDoctrine()->getRepository('AppBundle:Country')->findAll();
-        if(!is_object($countries)){
-            throw $this->createNotFoundException();
+
+       if(!is_object($countries)){
+//            throw $this->createNotFoundException();
         }
         return $countries;
     }
@@ -32,6 +33,7 @@ class DefaultController extends Controller
     public function countryByIso2Action($iso2)
     {
         $country = $this->getDoctrine()->getRepository('AppBundle:Country')->findOneBy(array('iso2' => $iso2));
+
         if(!is_object($country)){
             throw $this->createNotFoundException();
         }
