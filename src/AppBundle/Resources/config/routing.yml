@@ -1,0 +1,11 @@
+countries_list:
+    path:  '/countries-list'
+    defaults: { _controller: 'AppBundle:Default:countries' }
+
+country_iso:
+    path:  '/country-iso2/{iso2}'
+    defaults: { _controller: 'AppBundle:Default:countryByIso2', iso2: 'pt' }
+
+countries_lang:
+    path:  '/countries-lang/{lang}'
+    defaults: { _controller: 'AppBundle:Default:countriesByLanguage', lang: 'pt' }
